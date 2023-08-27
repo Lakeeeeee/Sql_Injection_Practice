@@ -1,0 +1,103 @@
+﻿@model string[]
+
+@{
+    ViewBag.Title = "CustomerList";
+}
+
+<h2>客戶訂單</h2>
+
+@using (Ajax.BeginForm("Search", "Parameter", new AjaxOptions()
+{
+    OnSuccess = "getResult"
+}))
+{
+    <div class="mt-4">
+        <label for="keyword">客戶：</label>
+        <input name="keyWord" id="keyword" />
+        <button>Search</button>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-2">
+        <table class="table" id="customerList">
+            <thead><tr><th>客戶列表</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="col-10">
+        <table id="testTarget">
+            <thead>
+                <tr>
+                    <th>訂單編號</th>
+                    <th>客戶</th>
+                    <th>收貨人</th>
+                    <th>收貨地址</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        const customerTable = document.getElementById('customerList');
+        let x = @Html.Raw(Json.Encode(Model));
+        x.forEach(function (value, index) {
+            let tr = document.createElement('tr');
+            let td = document.createElement('td');
+            td.textContent = value;
+            tr.appendChild(td);
+            customerTable.appendChild(tr);
+        });
+    });
+</script>
+
+<script>
+
+    let table = new DataTable('#testTarget', {
+        searching: false
+    });
+
+    function getResult(data) {
+        if (!data.Success) {
+            alert(data.Message);
+            return location.reload();
+        };
+        if (table) {
+            table.destroy();
+        };
+        console.log(data);
+        var dataArray = [];
+        for (var i = 0; i < data.Data.length; i++) {
+            dataArray.push([
+                data.Data[i].OrderID,
+                data.Data[i].CustomerID,
+                data.Data[i].ShipName,
+                data.Data[i].ShipAddress
+            ]);
+        };
+        table = new DataTable('#testTarget', {
+            searching: false,
+            data: dataArray,
+            columns: [
+                { title: '訂單編號' },
+                { title: '客戶' },
+                { title: '收貨人' },
+                { title: '收貨地址' }
+            ]
+        });
+        console.log(data);
+        console.log(dataArray);
+    }
+</script>
